@@ -1,46 +1,21 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My Products Store</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin:0; padding:0; background:#f9f9f9; }
-    header { background:#333; color:#fff; padding:20px; text-align:center; }
-    .products { display:flex; justify-content:center; padding:20px; }
-    .product-card { background:#fff; border:1px solid #ddd; border-radius:8px; width:250px; margin:15px; padding:15px; text-align:center; }
-    .product-card img { width:100%; height:auto; border-radius:8px; }
-    .product-card h3 { margin:10px 0; }
-    .product-card p { color:#555; }
-    .product-card button { background:#333; color:#fff; border:none; padding:10px 15px; cursor:pointer; border-radius:5px; }
-  </style>
-</head>
-<body>
-  <header>
-    <h1>Welcome to My Store</h1>
-    <p>Find the best products here</p>
-  </header>
+export default {
+  async fetch(request) {
+    if (request.method === "POST") {
+      const data = await request.json();
 
-  <section class="products">
-    <!-- Example product -->
-    <div class="product-card">
-      <img src="https://via.placeholder.com/250" alt="Product 1">
-      <h3>Product 1</h3>
-      <p>$19.99</p>
-      <button id="checkout-button">Buy Now</button>
-    </div>
-  </section>
+      const webhook = "YOUR_DISCORD_WEBHOOK_URL";
+      
+      await fetch(webhook, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          content: `New Form Submission:\nName: ${data.name}\nEmail: ${data.email}\nMessage: ${data.message}`
+        })
+      });
 
-  <!-- Stripe Checkout -->
-  <script src="https://js.stripe.com/v3/"></script>
-  <script>
-    const stripe = Stripe("YOUR_PUBLISHABLE_KEY");
+      return new Response("OK", { status: 200 });
+    }
 
-    document.getElementById("checkout-button").addEventListener("click", () => {
-      fetch("/create-checkout-session", { method: "POST" })
-        .then(res => res.json())
-        .then(session => stripe.redirectToCheckout({ sessionId: session.id }));
-    });
-  </script>
-</body>
-</html>
+    return new Response("Use POST", { status: 405 });
+  }
+};
